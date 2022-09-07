@@ -38,12 +38,6 @@ public class TeacherController {
     @ApiOperation("所有讲师列表")
     @GetMapping("findAll")
     public Result findAll(){
-        try {
-            int i =10/0;
-        }catch (Exception e)
-        {
-            throw new GgktException(201,"执行了自定义异常");
-        }
         List<Teacher> list = teacherService.list();
         return Result.ok(list).message("查询数据成功");
     }
