@@ -20,9 +20,12 @@ public class CodeGet {
         // 全局配置
         GlobalConfig gc = new GlobalConfig();
         String projectPath = System.getProperty("user.dir");
-        //gc.setOutputDir(projectPath + "/src/main/java");
-        gc.setOutputDir("C:\\Users\\Administrator\\Desktop\\IdeaProjects\\ggkt_parent\\service\\service_vod"+"/src/main/java");
 
+        // windows路径对应地址
+//        gc.setOutputDir("C:\\Users\\Administrator\\Desktop\\IdeaProjects\\ggkt_parent\\service\\service_vod"+"/src/main/java");
+
+        // mac路径对应地址
+        gc.setOutputDir("/Users/yang/IdeaProjects/ggkt_parent/service/service_vod"+"/src/main/java");
         gc.setServiceName("%sService");	//去掉Service接口的首字母I
         gc.setAuthor("atguigu");
         gc.setOpen(false);
@@ -50,7 +53,7 @@ public class CodeGet {
         // 5、策略配置
         StrategyConfig strategy = new StrategyConfig();
 
-        strategy.setInclude("teacher");
+        strategy.setInclude("subject");
 
         strategy.setNaming(NamingStrategy.underline_to_camel);//数据库表映射到实体的命名策略
 
