@@ -51,7 +51,7 @@ public class GubaDataController {
 //        gubaDataService.exportData(response);
 //    }
 
-    //股吧数据导出
+    //股吧数据流程
     @ApiOperation("数据流程")
     @GetMapping("giveData")
     public void giveData(HttpServletResponse response) throws IOException {
@@ -60,7 +60,6 @@ public class GubaDataController {
         FileWriter fw = new FileWriter(file, true);
         BufferedWriter bw = new BufferedWriter(fw);
 
-        StringBuffer sb = new StringBuffer();
         File ff = new File("/Users/yang/Desktop/Mock/2019");
         File[] fs = ff.listFiles();
         String xlsxName;
