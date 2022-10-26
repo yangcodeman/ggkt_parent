@@ -94,7 +94,7 @@ public class GubaDataServiceImpl extends ServiceImpl<GubaDataMapper, GubaData> i
 //                    .sheet("股吧数据")
 //                    .doWrite(gubaDataEeVoList);
 
-            File ff = new File("/Users/yang/Desktop/Output/"+xlsxName);
+            File ff = new File("/Users/yang/Desktop/output2021/"+xlsxName);
 //            if (!ff.exists()){
 //                ff.mkdir();
 //            }

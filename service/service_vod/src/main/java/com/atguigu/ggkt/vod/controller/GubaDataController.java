@@ -60,7 +60,7 @@ public class GubaDataController {
         FileWriter fw = new FileWriter(file, true);
         BufferedWriter bw = new BufferedWriter(fw);
 
-        File ff = new File("/Users/yang/Desktop/Mock/2019");
+        File ff = new File("/Users/yang/Desktop/Mock/2022");
         File[] fs = ff.listFiles();
         String xlsxName;
         MultipartFile multipartFile;
@@ -71,6 +71,7 @@ public class GubaDataController {
             }
             multipartFile = gubaDataService.getMultipartFile(fs[i]);
             xlsxName = multipartFile.getName();
+            System.out.println(xlsxName);
             try {
                 // 数据导入
                 gubaDataService.importData(multipartFile);
