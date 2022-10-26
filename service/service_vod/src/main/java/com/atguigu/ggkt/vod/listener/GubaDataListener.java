@@ -21,10 +21,10 @@ public class GubaDataListener extends AnalysisEventListener<GubaDataEeVo> {
 
     @Override
     public void invoke( GubaDataEeVo gubaDataEeVo, AnalysisContext analysisContext) {
-//        Subject subject = new Subject();
         GubaData gubaData = new GubaData();
-        //  SubjectEeVo -- Subject
-        BeanUtils.copyProperties(gubaDataEeVo,gubaData);
+        gubaData.setAttitudeValue(gubaDataEeVo.getAttitudeValue());
+        gubaData.setId(gubaDataEeVo.getId());
+//        BeanUtils.copyProperties(gubaDataEeVo,gubaData);
 
         gubaDataMapper.insert(gubaData);
     }

@@ -1,6 +1,7 @@
 package com.atguigu.ggkt.vod.service;
 
 import com.atguigu.ggkt.model.vod.GubaData;
+import com.atguigu.ggkt.vo.vod.GubaDataVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,9 +20,10 @@ public interface GubaDataService extends IService<GubaData> {
 
     void importData(MultipartFile file);
 
-    void exportData(HttpServletResponse response,String xlsxName);
+    void exportData(HttpServletResponse response,String xlsxName,GubaDataVo gubaDataVo);
 
     MultipartFile getMultipartFile(File file);
 
 
+    GubaDataVo calculateData(String xlsxName);
 }

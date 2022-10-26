@@ -5,11 +5,14 @@ import com.atguigu.ggkt.exception.GgktException;
 import com.atguigu.ggkt.model.vod.GubaData;
 import com.atguigu.ggkt.model.vod.Subject;
 import com.atguigu.ggkt.vo.vod.GubaDataEeVo;
+import com.atguigu.ggkt.vo.vod.GubaDataVo;
 import com.atguigu.ggkt.vo.vod.SubjectEeVo;
 import com.atguigu.ggkt.vod.listener.GubaDataListener;
 import com.atguigu.ggkt.vod.listener.SubjectListener;
 import com.atguigu.ggkt.vod.mapper.GubaDataMapper;
 import com.atguigu.ggkt.vod.service.GubaDataService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jdk.jfr.ContentType;
 import lombok.val;
@@ -42,6 +45,9 @@ import java.util.List;
 public class GubaDataServiceImpl extends ServiceImpl<GubaDataMapper, GubaData> implements GubaDataService {
     @Resource
     private GubaDataListener gubaDataListener;
+    @Resource GubaDataMapper gubaDataMapper;
+    @Resource
+    GubaDataVo gubaDataVo;
 
     @Override
     public void importData(MultipartFile file) {
@@ -55,12 +61,8 @@ public class GubaDataServiceImpl extends ServiceImpl<GubaDataMapper, GubaData> i
     }
 
     @Override
-    public void exportData(HttpServletResponse response,String xlsxName) {
+    public void exportData(HttpServletResponse response,String xlsxName,GubaDataVo gubaDataVo) {
         try {
-            // 消极因子
-            BigDecimal passiveBigdemical = new BigDecimal(0.30);
-            // 积极因子
-            BigDecimal positiveBigdemical = new BigDecimal(0.70);
             //设置下载信息
             response.setContentType("application/vnd.ms-excel");
             response.setCharacterEncoding("utf-8");
@@ -74,18 +76,7 @@ public class GubaDataServiceImpl extends ServiceImpl<GubaDataMapper, GubaData> i
             for (GubaData gubaData: gubaDataList) {
                 GubaDataEeVo gubaDataEeVo = new GubaDataEeVo();
                 BeanUtils.copyProperties(gubaData,gubaDataEeVo);
-                int passiveFlag = gubaDataEeVo.getEmotionValue().compareTo(passiveBigdemical);
-                int positiveFlag = gubaDataEeVo.getEmotionValue().compareTo(positiveBigdemical);
-                if (passiveFlag != 1 ){
-                    // 说明情绪值小于等于0.3
-                    gubaDataEeVo.setIsPositive("消极");
-                    gubaDataEeVo.setAttitudeValue("-1");
-                }
-                if (positiveFlag != -1 ){
-                    // 说明情绪值大于等于0.7
-                    gubaDataEeVo.setIsPositive("积极");
-                    gubaDataEeVo.setAttitudeValue("1");
-                }
+//
                 gubaDataEeVoList.add(gubaDataEeVo);
             }
 
@@ -95,9 +86,6 @@ public class GubaDataServiceImpl extends ServiceImpl<GubaDataMapper, GubaData> i
 //                    .doWrite(gubaDataEeVoList);
 
             File ff = new File("/Users/yang/Desktop/output2021/"+xlsxName);
-//            if (!ff.exists()){
-//                ff.mkdir();
-//            }
             EasyExcel.write(ff, GubaDataEeVo.class)
                     .sheet("xlsxName")
                     .doWrite(gubaDataEeVoList);
@@ -117,5 +105,35 @@ public class GubaDataServiceImpl extends ServiceImpl<GubaDataMapper, GubaData> i
             e.printStackTrace();
         }
         return multipartFile;
+    }
+
+    @Override
+    public GubaDataVo calculateData(String xlsxName) {
+        Integer totalNumber = gubaDataMapper.selectCount(null);
+
+        QueryWrapper<GubaData> gubaQueryWrapper = Wrappers.query();
+
+        gubaQueryWrapper.eq("attitude_value",1);
+
+        Integer positiveNumber = gubaDataMapper.selectCount(gubaQueryWrapper);
+
+        gubaQueryWrapper.eq("attitude_value",-1);
+
+        Integer passiveNumber = gubaDataMapper.selectCount(gubaQueryWrapper);
+
+        float bsiNumber = (float)(positiveNumber-passiveNumber)/(positiveNumber+passiveNumber);
+
+        double sentimentNumber = Math.log(totalNumber);
+
+        GubaDataVo gubaDataVo = new GubaDataVo();
+
+        gubaDataVo.setTotalNumber(String.valueOf(totalNumber));
+        gubaDataVo.setPassiveNumber(String.valueOf(passiveNumber));
+        gubaDataVo.setPositiveNumber(String.valueOf(positiveNumber));
+        gubaDataVo.setBsiNumber(String.valueOf(bsiNumber));
+        gubaDataVo.setSentimentNumber(String.valueOf(sentimentNumber));
+        gubaDataVo.setStockName(xlsxName);
+
+        return gubaDataVo;
     }
 }
