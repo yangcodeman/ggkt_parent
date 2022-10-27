@@ -1,9 +1,10 @@
 package com.atguigu.ggkt.vod.controller;
 
 
+import com.atguigu.ggkt.model.vod.GubaDataVo;
 import com.atguigu.ggkt.result.Result;
-import com.atguigu.ggkt.vo.vod.GubaDataVo;
 import com.atguigu.ggkt.vod.service.GubaDataService;
+import com.atguigu.ggkt.vod.service.GubaDataVoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,6 +37,8 @@ public class GubaDataController {
 
     @Resource
     GubaDataService gubaDataService;
+    @Resource
+    GubaDataVoService gubaDataVoService;
 
     //股吧数据导入
     @ApiOperation("股吧数据导入")
@@ -77,7 +80,7 @@ public class GubaDataController {
                 // 数据导入
                 gubaDataService.importData(multipartFile);
                 // 数据导出
-                gubaDataService.exportData(response, xlsxName);
+//                gubaDataService.exportData(response, xlsxName);
                 // 数据清除
                 gubaDataService.remove(new QueryWrapper<>());
                 fs[i].delete();
@@ -92,7 +95,7 @@ public class GubaDataController {
     }
 
     //股吧数据流程
-    @ApiOperation("数据流程")
+    @ApiOperation("数据流程1111")
     @GetMapping("calculateData")
     public void calculateData(HttpServletResponse response) throws IOException {
 
@@ -100,9 +103,9 @@ public class GubaDataController {
         FileWriter fw = new FileWriter(file, true);
         BufferedWriter bw = new BufferedWriter(fw);
 
-        File ff = new File("/Users/yang/Desktop/Mock/2022");
+        File ff = new File("/Users/yang/Desktop/input/2019");
         File[] fs = ff.listFiles();
-        String xlsxName;
+        String xlsxName ;
         MultipartFile multipartFile;
         for (int i = 0; i < fs.length; i++) {
             String fileName = fs[i].getName();
@@ -110,15 +113,14 @@ public class GubaDataController {
                 continue;
             }
             multipartFile = gubaDataService.getMultipartFile(fs[i]);
-            xlsxName = multipartFile.getName();
+            String name = multipartFile.getName();
+            xlsxName = name.substring(0,name.length()-5);
             System.out.println(xlsxName);
             try {
                 // 数据导入
                 gubaDataService.importData(multipartFile);
-                // 数据计算
-                GubaDataVo gubaDataVo = gubaDataService.calculateData(xlsxName);
-                // 数据导出
-                gubaDataService.exportData(response, xlsxName,gubaDataVo);
+                // 数据转换
+                gubaDataService.calculateData(xlsxName);
                 // 数据清除
                 gubaDataService.remove(new QueryWrapper<>());
                 fs[i].delete();
@@ -130,6 +132,10 @@ public class GubaDataController {
                 continue;
             }
         }
+        // 数据导出
+        gubaDataVoService.exportData(response, "2019年转换后数据.xlsx");
+        // 数据清除
+        gubaDataVoService.remove(new QueryWrapper<>());
     }
 }
 

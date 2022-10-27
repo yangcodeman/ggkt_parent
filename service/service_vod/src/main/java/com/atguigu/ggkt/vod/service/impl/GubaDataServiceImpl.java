@@ -3,19 +3,16 @@ package com.atguigu.ggkt.vod.service.impl;
 import com.alibaba.excel.EasyExcel;
 import com.atguigu.ggkt.exception.GgktException;
 import com.atguigu.ggkt.model.vod.GubaData;
-import com.atguigu.ggkt.model.vod.Subject;
+import com.atguigu.ggkt.model.vod.GubaDataVo;
 import com.atguigu.ggkt.vo.vod.GubaDataEeVo;
-import com.atguigu.ggkt.vo.vod.GubaDataVo;
-import com.atguigu.ggkt.vo.vod.SubjectEeVo;
+import com.atguigu.ggkt.vo.vod.GubaDataVo1;
 import com.atguigu.ggkt.vod.listener.GubaDataListener;
-import com.atguigu.ggkt.vod.listener.SubjectListener;
 import com.atguigu.ggkt.vod.mapper.GubaDataMapper;
+import com.atguigu.ggkt.vod.mapper.GubaDataVoMapper;
 import com.atguigu.ggkt.vod.service.GubaDataService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import jdk.jfr.ContentType;
-import lombok.val;
 import org.springframework.beans.BeanUtils;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
@@ -27,9 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,13 +42,13 @@ public class GubaDataServiceImpl extends ServiceImpl<GubaDataMapper, GubaData> i
     private GubaDataListener gubaDataListener;
     @Resource GubaDataMapper gubaDataMapper;
     @Resource
-    GubaDataVo gubaDataVo;
+    GubaDataVoMapper gubaDataVoMapper;
 
     @Override
     public void importData(MultipartFile file) {
         try {
             EasyExcel.read(file.getInputStream(),
-                    GubaDataEeVo.class,
+                    GubaDataVo1.class,
                     gubaDataListener).sheet().doRead();
         } catch (IOException e) {
             throw new GgktException(20001,"表格导入失败");
@@ -108,7 +103,7 @@ public class GubaDataServiceImpl extends ServiceImpl<GubaDataMapper, GubaData> i
     }
 
     @Override
-    public GubaDataVo calculateData(String xlsxName) {
+    public void calculateData(String xlsxName) {
         Integer totalNumber = gubaDataMapper.selectCount(null);
 
         QueryWrapper<GubaData> gubaQueryWrapper = Wrappers.query();
@@ -117,13 +112,16 @@ public class GubaDataServiceImpl extends ServiceImpl<GubaDataMapper, GubaData> i
 
         Integer positiveNumber = gubaDataMapper.selectCount(gubaQueryWrapper);
 
-        gubaQueryWrapper.eq("attitude_value",-1);
+        QueryWrapper<GubaData> gubaQuery1Wrapper = Wrappers.query();
 
-        Integer passiveNumber = gubaDataMapper.selectCount(gubaQueryWrapper);
+        gubaQuery1Wrapper.eq("attitude_value",-1);
+
+        Integer passiveNumber = gubaDataMapper.selectCount(gubaQuery1Wrapper);
 
         float bsiNumber = (float)(positiveNumber-passiveNumber)/(positiveNumber+passiveNumber);
 
-        double sentimentNumber = Math.log(totalNumber);
+        double log = Math.log(totalNumber);
+        double sentimentNumber = log * bsiNumber;
 
         GubaDataVo gubaDataVo = new GubaDataVo();
 
@@ -134,6 +132,6 @@ public class GubaDataServiceImpl extends ServiceImpl<GubaDataMapper, GubaData> i
         gubaDataVo.setSentimentNumber(String.valueOf(sentimentNumber));
         gubaDataVo.setStockName(xlsxName);
 
-        return gubaDataVo;
+        gubaDataVoMapper.insert(gubaDataVo);
     }
 }
